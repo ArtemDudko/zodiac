@@ -21,12 +21,16 @@ namespace zodiac
             //Variables
             string name;
             DateTime todayDate = DateTime.Today;
-            DateTime userDate;            
+            DateTime userDate;
+
             
-            while(GetYesNo("Would you like to get your Astrological Personality traits? ")) //n exits program
-            {
-                //Prompt:
-                do
+            if(GetYesNo("Would you like to use special date for today (y/n)? "))
+                todayDate = GetDate("Please enter special date for 'today': ");
+
+
+            while(GetYesNo("Would you like to get your Astrological Personality traits? "))
+            {           //n exits program, y runs forever
+                do          //Prompt:
                 {
                     Console.Write("Enter Name: ");
                     name = Console.ReadLine();
@@ -38,41 +42,31 @@ namespace zodiac
 
                 //Response:
                 Console.WriteLine("\nThank you, {0}. Based on the information provided, I can tell you the following:", name);
-
-                GetAgeAndNextBday(userDate);        
+                GetAgeAndNextBday(userDate, todayDate);        
                 GetSign(userDate);          //decided to keep it to one method since they both use some of the same variables
             }   
-        }
-
-    
+        }  
 
         static DateTime GetDate(string msg)
         {
-            DateTime goodDate;
-            //keep trying until we get a date that parses
+            DateTime goodDate;            
             bool pass = false;
-
-            Console.Write("Enter your birth date: ");
-
+            Console.Write(msg);
+            //keep trying until we get a date that parses
             do
-            {
-                
+            {                
                 pass = DateTime.TryParse(Console.ReadLine(), out goodDate);
                 if (pass == false)
                     Console.WriteLine("Invalid date. Please enter a valid date (mm/dd/yyyy): ");
-
-
             } while (pass == false);
             return goodDate;
         }
 
         static void GetSign(DateTime userBDay)
-        {
-            
+        {            
             // Zodiac personallity traits
             // Based on source:
-            // http://nuclear.ucdavis.edu/~rpicha/personal/astrology/
-            
+            // http://nuclear.ucdavis.edu/~rpicha/personal/astrology/            
             string[] zodiacSign =
             {
                 "Sagittarius",
@@ -165,16 +159,12 @@ namespace zodiac
 
                 
                 };
-
-
             //Dates less than this number mean the index matches the month
             //EX: Capricorn is Dec23-Jan20, zodiacEndDay[0] = 20, and values 21 and over for the day
             //correspond with the next zodiac sign for that month, so values over 20 for Jan would
             //be Aquarius
             int[] zodiacEndDay = { 20, 19, 20, 20, 21, 21, 22, 21, 23, 23, 22, 22 };
             //20 is the last day in Jan, is indexed at 0, and so on
-
-
 
             //if user birthday is in Jan, they are either Cap. or Aqua. depending on the day it ends
             //use zodiacEndDay to check with index, and either print this month's zodiac or next month's
@@ -188,14 +178,14 @@ namespace zodiac
                 Console.WriteLine("You were born under the sign of {0}", zodiacSign[(userBDay.Month + 1) % 12]);
                 Console.WriteLine("You have the following personality traits:\n\n{0}",zodiacDescription[(userBDay.Month + 1) % 12]);
             }
-
             Console.WriteLine("NOTE: Source for Astrological/Zodiac personality traits\n" +
                 "is http://nuclear.ucdavis.edu/~rpicha/personal/astrology/\n");
         }
 
-        static void GetAgeAndNextBday(DateTime userBDay)
+        static void GetAgeAndNextBday(DateTime userBDay, DateTime todayDate)
         {
             //Leap Day stuff to avoid out of range exception
+            //this adds to age array, if not leap day then adds a 0, doing nothing
             int leapCheckMonth = 0;
             int leapCheckDay = 0;
             if ((userBDay.Month == 2) && (userBDay.Day == 29))
@@ -207,8 +197,7 @@ namespace zodiac
             //Calculate age
             //age[] array     0=years, 1=months, 2=days
             double[] age = { 0, 0, 0 };    
-            int daysDiff = DateTime.DaysInMonth(userBDay.Year, userBDay.Month);
-            DateTime todayDate = DateTime.Today;
+            int daysDiff = DateTime.DaysInMonth(userBDay.Year, userBDay.Month);            
             
             //First find difference between all times before tallying them up
             age[0] = todayDate.Year - userBDay.Year;
@@ -239,25 +228,20 @@ namespace zodiac
 
 
 
-
-
             //Next BDay Algorithm   
             //Compare dates to see if the next bday will happen this year or next year, also catches Leap Year bug
+            //Leap days automatically jump to next day as per handout for calculations
             DateTime nextBDay = new DateTime(todayDate.Year + 1, userBDay.Month + leapCheckMonth, userBDay.Day - leapCheckDay);
             DateTime nextBDayCheck = new DateTime(todayDate.Year, userBDay.Month + leapCheckMonth, userBDay.Day - leapCheckDay);
-            System.TimeSpan daysLeft;
 
-            
+            //Easiest method I could find of tallying total days without incessant looping:
             //the time span holds total days, including the different days in each month
-            if (nextBDayCheck < todayDate)
+            System.TimeSpan daysLeft;      
+            if (nextBDayCheck < todayDate)      //if the month/day is earlier than todayDate, count into next year
                 daysLeft = nextBDay.Subtract(todayDate);
-            else
+            else                                //if bday is later in the same year, count same year
                 daysLeft = nextBDayCheck.Subtract(todayDate);
-
-
             Console.WriteLine("There are {0} days until your next birthday", daysLeft.Days);
-
-
         }        
 
         //GET YES/NO OR Y/N RESPONSE. RETURN TRUE FOR YES/Y, FALSE FOR NO/N
