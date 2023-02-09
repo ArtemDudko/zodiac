@@ -206,12 +206,21 @@ namespace zodiac
 
             //Subtraction Operations with dates, carry over days and months if there's not enough
             //Case 1, the general case, is if age has no negatives
-            if (todayDate.Month < userBDay.Month)       //Case 2, only months are negative
+
+            if (age[2] < 0)
+            {
+                age[1]--;
+                age[2] = age[2] + daysDiff;
+            }
+
+            if (age[1] < 0)       //Case 2, only months are negative
             {
                 age[0]--;
                 age[1] = age[1] + 12;
             }
 
+            
+/*
             if ((todayDate.Month == userBDay.Month) && (todayDate.Day < userBDay.Day))      //Case 3, bday later in the same month
             {
                 age[0]--;
@@ -220,9 +229,8 @@ namespace zodiac
             }
             else if (todayDate.Day < userBDay.Day)      //Case 4, earlier month but later day of the month, no need to change years since it also goes thru case 2
             {
-                age[1]--;
-                age[2] = age[2] + daysDiff;
-            }
+                
+            }*/
             
             Console.WriteLine("You are {0} year(s), {1} month(s), and {2} day(s) old", age[0], age[1], age[2]);
 
